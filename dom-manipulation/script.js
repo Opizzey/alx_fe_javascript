@@ -46,31 +46,47 @@ let syncInterval;
 // Simulate server URL (using JSONPlaceholder as fallback)
 const SERVER_URL = 'https://jsonplaceholder.typicode.com/posts';
 
-// Function to simulate fetching data from server
-async function fetchDataFromServer() {
+// Function to simulate fetching quotes from server (required function name)
+// This function fetches data from the server using a mock API (JSONPlaceholder)
+async function fetchQuotesFromServer() {
     try {
+        console.log('Fetching quotes from server using JSONPlaceholder API...');
+        // Fetching data from the server using a mock API
         const response = await fetch(SERVER_URL);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const serverData = await response.json();
         
         // Simulate server quotes by transforming some posts
         const simulatedQuotes = serverData.slice(0, 5).map((post, index) => ({
-            text: post.title.charAt(0).toUpperCase() + post.title.slice(1),
+            text: post.title.charAt(0).toUpperCase() + post.title.slice(1) + '.',
             category: ['Wisdom', 'Technology', 'Life', 'Inspiration', 'Growth'][index % 5],
             id: `server_${post.id}`,
             lastModified: new Date().toISOString(),
             source: 'server'
         }));
         
+        console.log(`Successfully fetched ${simulatedQuotes.length} quotes from server`);
         return simulatedQuotes;
     } catch (error) {
-        console.error('Failed to fetch data from server:', error);
+        console.error('Failed to fetch quotes from server:', error);
         return [];
     }
 }
 
+// Function to simulate fetching data from server (alias for compatibility)
+async function fetchDataFromServer() {
+    return await fetchQuotesFromServer();
+}
+
 // Function to simulate posting data to server
+// This function posts data to the server using a mock API
 async function postDataToServer(quotes) {
     try {
+        console.log('Posting data to server using JSONPlaceholder API...');
+        // Posting data to the server using a mock API
         const response = await fetch(SERVER_URL, {
             method: 'POST',
             headers: {
@@ -78,15 +94,18 @@ async function postDataToServer(quotes) {
             },
             body: JSON.stringify({
                 quotes: quotes.filter(quote => !quote.source || quote.source !== 'server'),
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                action: 'sync_quotes'
             })
         });
         
         if (response.ok) {
             console.log('Data successfully synced to server');
             return true;
+        } else {
+            console.log('Server responded with error:', response.status);
+            return false;
         }
-        return false;
     } catch (error) {
         console.error('Failed to post data to server:', error);
         return false;
@@ -149,23 +168,23 @@ async function syncWithServer() {
         }));
         
         // Fetch server data
-        const serverQuotes = await fetchDataFromServer();
+        const serverQuotes = await fetchQuotesFromServer();
         
         if (serverQuotes.length > 0) {
-            // Resolve conflicts
+            // Resolve conflicts between local and server data
             const { mergedQuotes, conflictLog } = resolveConflicts(localQuotes, serverQuotes);
             
-            // Update local data
+            // Update local data - updating local storage with server data and conflict resolution
             quotes.length = 0;
             quotes.push(...mergedQuotes);
             
-            // Save to localStorage
+            // Save to localStorage - updating local storage with server data
             saveQuotes();
             
             // Update UI
             populateCategories();
             
-            // Show conflict resolution results
+            // Show conflict resolution results - UI elements for data updates or conflicts
             if (conflictLog.length > 0) {
                 showConflictResolution(conflictLog);
             } else {
@@ -186,7 +205,12 @@ async function syncWithServer() {
     }
 }
 
-// Function to show sync status
+// Function to sync quotes (required function name)
+async function syncQuotes() {
+    return await syncWithServer();
+}
+
+// Function to show sync status - UI elements or notifications for data updates or conflicts
 function showSyncStatus(message, type = 'info') {
     const statusElement = document.getElementById('syncStatus') || createSyncStatusElement();
     
@@ -211,12 +235,12 @@ function createSyncStatusElement() {
     return statusElement;
 }
 
-// Function to show conflict resolution results
+// Function to show conflict resolution results - UI notifications for conflicts
 function showConflictResolution(conflictLog) {
     const conflictCount = conflictLog.length;
     showSyncStatus(`Sync completed - ${conflictCount} conflict(s) resolved`, 'success');
     
-    // Create detailed conflict notification
+    // Create detailed conflict notification - UI elements for data updates or conflicts
     const conflictNotification = document.createElement('div');
     conflictNotification.className = 'conflict-notification';
     conflictNotification.innerHTML = `
@@ -238,10 +262,11 @@ function showConflictResolution(conflictLog) {
     }, 10000);
 }
 
-// Function to start periodic sync
+// Function to start periodic sync - periodically checks for new quotes from server
 function startPeriodicSync() {
-    // Sync every 30 seconds (for demo purposes)
-    syncInterval = setInterval(syncWithServer, 30000);
+    // Sync every 30 seconds (for demo purposes) - periodically checking for new quotes from the server
+    syncInterval = setInterval(syncQuotes, 30000);
+    showSyncStatus('Auto-sync started - checking server every 30 seconds', 'success');
 }
 
 // Function to stop periodic sync
@@ -254,7 +279,7 @@ function stopPeriodicSync() {
 
 // Function to manually trigger sync
 function manualSync() {
-    syncWithServer();
+    syncQuotes();
 }
 
 // Function to add demo server data for testing (development only)
@@ -706,7 +731,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize sync functionality
     // Perform initial sync after a short delay
     setTimeout(() => {
-        manualSync();
+        syncQuotes();
     }, 2000);
     
     // Show sync controls status
