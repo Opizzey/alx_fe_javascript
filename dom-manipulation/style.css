@@ -126,6 +126,109 @@ blockquote footer {
   background-color: #005a87;
 }
 
+/* Import/Export Section Styles */
+.import-export-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+}
+
+.import-export-section h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.export-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  transition: background-color 0.3s;
+}
+
+.export-btn:hover {
+  background-color: #218838;
+}
+
+.import-label {
+  display: inline-block;
+  background-color: #17a2b8;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 10px;
+  transition: background-color 0.3s;
+}
+
+.import-label:hover {
+  background-color: #138496;
+}
+
+#importFile {
+  display: none;
+}
+
+/* Last viewed quote indicator */
+.last-viewed-indicator {
+  color: #28a745;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Import/Export button container */
+.import-export-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Loading state for import */
+.import-label.loading {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Enhanced form validation styles */
+.form-input.error::placeholder {
+  color: #ff6b6b;
+}
+
+.form-input.success {
+  border-color: #28a745;
+}
+
+/* Error message styles */
+.error-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #dc3545;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+  font-weight: bold;
+  display: none;
+}
+
+/* File input wrapper styling */
+.file-input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 /* Success Message Styles */
 #successMessage {
   position: fixed;
@@ -157,5 +260,30 @@ blockquote footer {
   
   .form-input {
     font-size: 16px; /* Prevents zoom on mobile */
+  }
+  
+  /* Mobile responsiveness for import/export */
+  .import-export-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .export-btn,
+  .import-label {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+    margin-right: 0;
+  }
+  
+  #successMessage,
+  .error-message {
+    right: 10px;
+    left: 10px;
+    top: 10px;
+  }
+  
+  .last-viewed-indicator {
+    font-size: 0.8em;
   }
 }

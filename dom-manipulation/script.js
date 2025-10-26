@@ -7,6 +7,97 @@ const quotes = [
     category: "Passion"}
 ];
 
+// Web Storage Functions
+function saveQuotes() {
+    localStorage.setItem('quotes', JSON.stringify(quotes));
+}
+
+function loadQuotes() {
+    const savedQuotes = localStorage.getItem('quotes');
+    if (savedQuotes) {
+        quotes.length = 0; // Clear the existing array
+        quotes.push(...JSON.parse(savedQuotes));
+    }
+}
+
+// Session Storage for last viewed quote
+function saveLastViewedQuote(quote) {
+    sessionStorage.setItem('lastViewedQuote', JSON.stringify(quote));
+}
+
+function getLastViewedQuote() {
+    const lastViewed = sessionStorage.getItem('lastViewedQuote');
+    return lastViewed ? JSON.parse(lastViewed) : null;
+}
+
+// JSON Export Function
+function exportToJsonFile() {
+    const dataStr = JSON.stringify(quotes, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const url = URL.createObjectURL(dataBlob);
+    const exportAnchor = document.createElement('a');
+    exportAnchor.href = url;
+    exportAnchor.download = 'quotes.json';
+    exportAnchor.click();
+    
+    URL.revokeObjectURL(url);
+    showSuccessMessage('Quotes exported successfully!');
+}
+
+// JSON Import Function
+function importFromJsonFile(event) {
+    const fileReader = new FileReader();
+    fileReader.onload = function(event) {
+        try {
+            const importedQuotes = JSON.parse(event.target.result);
+            
+            // Validate imported data
+            if (Array.isArray(importedQuotes)) {
+                // Validate each quote has required properties
+                const validQuotes = importedQuotes.filter(quote => 
+                    quote.text && quote.category && 
+                    typeof quote.text === 'string' && 
+                    typeof quote.category === 'string'
+                );
+                
+                if (validQuotes.length > 0) {
+                    // Add imported quotes to existing array
+                    quotes.push(...validQuotes);
+                    
+                    // Save to local storage
+                    saveQuotes();
+                    
+                    // Update category filter
+                    updateCategoryFilter();
+                    
+                    // Show success message
+                    showSuccessMessage(`${validQuotes.length} quotes imported successfully!`);
+                    
+                    // Display a random quote to show the import worked
+                    showRandomQuote();
+                    
+                    if (validQuotes.length < importedQuotes.length) {
+                        showErrorMessage(`${importedQuotes.length - validQuotes.length} invalid quotes were skipped.`);
+                    }
+                } else {
+                    showErrorMessage('No valid quotes found in the file. Each quote must have "text" and "category" properties.');
+                }
+            } else {
+                showErrorMessage('Invalid JSON format. Please ensure the file contains an array of quotes.');
+            }
+        } catch (error) {
+            showErrorMessage('Error reading file. Please ensure it is a valid JSON file.');
+        }
+    };
+    
+    fileReader.onerror = function() {
+        showErrorMessage('Error reading the selected file.');
+    };
+    
+    fileReader.readAsText(event.target.files[0]);
+}
+
 // Function to display a random quote
 function showRandomQuote() {
     const quoteDisplay = document.getElementById('quoteDisplay');
@@ -41,6 +132,9 @@ function showRandomQuote() {
     
     blockquote.appendChild(footer);
     quoteDisplay.appendChild(blockquote);
+    
+    // Save the last viewed quote to session storage
+    saveLastViewedQuote(randomQuote);
 }
 
 // Function to create and display the add quote form (required by assignment)
@@ -92,6 +186,48 @@ function createAddQuoteForm() {
     addButton.addEventListener('click', addQuote);
     
     formContainer.appendChild(addButton);
+    
+    // Create import/export section
+    const importExportSection = document.createElement('div');
+    importExportSection.className = 'import-export-section';
+    
+    const sectionTitle = document.createElement('h4');
+    sectionTitle.textContent = 'Import/Export Quotes';
+    importExportSection.appendChild(sectionTitle);
+    
+    // Create controls container
+    const controlsContainer = document.createElement('div');
+    controlsContainer.className = 'import-export-controls';
+    
+    // Create export button
+    const exportButton = document.createElement('button');
+    exportButton.className = 'export-btn';
+    exportButton.textContent = 'Export Quotes to JSON';
+    exportButton.addEventListener('click', exportToJsonFile);
+    controlsContainer.appendChild(exportButton);
+    
+    // Create import file input with wrapper
+    const importWrapper = document.createElement('div');
+    importWrapper.className = 'file-input-wrapper';
+    
+    const importLabel = document.createElement('label');
+    importLabel.setAttribute('for', 'importFile');
+    importLabel.className = 'import-label';
+    importLabel.textContent = 'Import Quotes from JSON';
+    
+    const importInput = document.createElement('input');
+    importInput.type = 'file';
+    importInput.id = 'importFile';
+    importInput.accept = '.json';
+    importInput.addEventListener('change', importFromJsonFile);
+    
+    importWrapper.appendChild(importLabel);
+    importWrapper.appendChild(importInput);
+    controlsContainer.appendChild(importWrapper);
+    
+    importExportSection.appendChild(controlsContainer);
+    
+    formContainer.appendChild(importExportSection);
     
     // Insert the form after the newQuote button
     const newQuoteButton = document.getElementById('newQuote');
@@ -259,6 +395,9 @@ function addQuote() {
     
     quotes.push(newQuote);
     
+    // Save to local storage
+    saveQuotes();
+    
     // Clear the input fields
     quoteTextInput.value = '';
     quoteCategoryInput.value = '';
@@ -297,16 +436,66 @@ function showSuccessMessage(message) {
     }, 3000);
 }
 
+// Function to show error message
+function showErrorMessage(message) {
+    // Create or update error message element
+    let errorMsg = document.getElementById('errorMessage');
+    if (!errorMsg) {
+        errorMsg = document.createElement('div');
+        errorMsg.id = 'errorMessage';
+        errorMsg.className = 'error-message';
+        document.body.appendChild(errorMsg);
+    }
+    
+    errorMsg.textContent = message;
+    errorMsg.style.display = 'block';
+    
+    // Auto-hide after 4 seconds (longer for errors)
+    setTimeout(() => {
+        errorMsg.style.display = 'none';
+    }, 4000);
+}
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
+    // Load quotes from local storage first
+    loadQuotes();
+    
     // Create the add quote form (as required in Step 2)
     createAddQuoteForm();
     
     // Create category filter for displaying quotes by category
     createCategoryFilter();
     
-    // Show initial random quote
-    showRandomQuote();
+    // Show initial random quote or last viewed quote
+    const lastViewed = getLastViewedQuote();
+    if (lastViewed && quotes.some(q => q.text === lastViewed.text && q.category === lastViewed.category)) {
+        // Display last viewed quote if it still exists
+        const quoteDisplay = document.getElementById('quoteDisplay');
+        quoteDisplay.innerHTML = '';
+        
+        const blockquote = document.createElement('blockquote');
+        const quoteParagraph = document.createElement('p');
+        quoteParagraph.textContent = `"${lastViewed.text}"`;
+        blockquote.appendChild(quoteParagraph);
+        
+        const footer = document.createElement('footer');
+        footer.textContent = 'Category: ';
+        const categoryStrong = document.createElement('strong');
+        categoryStrong.textContent = lastViewed.category;
+        footer.appendChild(categoryStrong);
+        
+        blockquote.appendChild(footer);
+        quoteDisplay.appendChild(blockquote);
+        
+        // Add indicator that this is the last viewed quote
+        const lastViewedIndicator = document.createElement('small');
+        lastViewedIndicator.textContent = '(Last viewed quote)';
+        lastViewedIndicator.className = 'last-viewed-indicator';
+        quoteDisplay.appendChild(lastViewedIndicator);
+    } else {
+        showRandomQuote();
+    }
     
     // Add event listener to the "Show New Quote" button
     const newQuoteButton = document.getElementById('newQuote');
