@@ -1,0 +1,23 @@
+[
+  {
+    "text": "The only way to do great work is to love what you do",
+    "category": "Passion",
+    "id": "test_1",
+    "lastModified": "2025-10-26T12:00:00.000Z",
+    "source": "test"
+  },
+  {
+    "text": "Success is not final, failure is not fatal: it is the courage to continue that counts",
+    "category": "Motivation", 
+    "id": "test_2",
+    "lastModified": "2025-10-26T12:00:00.000Z",
+    "source": "test"
+  },
+  {
+    "text": "The future belongs to those who believe in the beauty of their dreams",
+    "category": "Dreams",
+    "id": "test_3", 
+    "lastModified": "2025-10-26T12:00:00.000Z",
+    "source": "test"
+  }
+]

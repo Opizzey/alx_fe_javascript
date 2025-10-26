@@ -29,6 +29,15 @@
       <label for="importFile">Import Quotes</label>
     </div>
     
+    <!-- Server Sync Section -->
+    <div class="sync-section">
+      <h4>Server Synchronization</h4>
+      <button id="manualSyncBtn" onclick="manualSync()">Sync Now</button>
+      <button id="startSyncBtn" onclick="startPeriodicSync()">Start Auto-Sync</button>
+      <button id="stopSyncBtn" onclick="stopPeriodicSync()">Stop Auto-Sync</button>
+      <div id="syncStatus" class="sync-status" style="display: none;"></div>
+    </div>
+    
     <script src="script.js"></script>
   </body>
   </html>
