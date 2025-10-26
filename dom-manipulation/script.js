@@ -187,48 +187,6 @@ function createAddQuoteForm() {
     
     formContainer.appendChild(addButton);
     
-    // Create import/export section
-    const importExportSection = document.createElement('div');
-    importExportSection.className = 'import-export-section';
-    
-    const sectionTitle = document.createElement('h4');
-    sectionTitle.textContent = 'Import/Export Quotes';
-    importExportSection.appendChild(sectionTitle);
-    
-    // Create controls container
-    const controlsContainer = document.createElement('div');
-    controlsContainer.className = 'import-export-controls';
-    
-    // Create export button
-    const exportButton = document.createElement('button');
-    exportButton.className = 'export-btn';
-    exportButton.textContent = 'Export Quotes to JSON';
-    exportButton.addEventListener('click', exportToJsonFile);
-    controlsContainer.appendChild(exportButton);
-    
-    // Create import file input with wrapper
-    const importWrapper = document.createElement('div');
-    importWrapper.className = 'file-input-wrapper';
-    
-    const importLabel = document.createElement('label');
-    importLabel.setAttribute('for', 'importFile');
-    importLabel.className = 'import-label';
-    importLabel.textContent = 'Import Quotes from JSON';
-    
-    const importInput = document.createElement('input');
-    importInput.type = 'file';
-    importInput.id = 'importFile';
-    importInput.accept = '.json';
-    importInput.addEventListener('change', importFromJsonFile);
-    
-    importWrapper.appendChild(importLabel);
-    importWrapper.appendChild(importInput);
-    controlsContainer.appendChild(importWrapper);
-    
-    importExportSection.appendChild(controlsContainer);
-    
-    formContainer.appendChild(importExportSection);
-    
     // Insert the form after the newQuote button
     const newQuoteButton = document.getElementById('newQuote');
     newQuoteButton.parentNode.insertBefore(formContainer, newQuoteButton.nextSibling);
@@ -466,6 +424,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Create category filter for displaying quotes by category
     createCategoryFilter();
+    
+    // Set up import/export functionality
+    const exportButton = document.getElementById('exportQuotes');
+    if (exportButton) {
+        exportButton.addEventListener('click', exportToJsonFile);
+    }
+    
+    const importInput = document.getElementById('importFile');
+    if (importInput) {
+        importInput.addEventListener('change', importFromJsonFile);
+    }
     
     // Show initial random quote or last viewed quote
     const lastViewed = getLastViewedQuote();
